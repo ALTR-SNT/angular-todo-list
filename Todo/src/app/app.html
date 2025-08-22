@@ -1,0 +1,130 @@
+<header>
+  <h1>{{title()}}</h1>
+  @if (loading()) {
+    <div class="loading">Loading...</div>
+  }
+  @if (error()) {
+    <div class="error">{{error()}}</div>
+  }
+</header>
+
+<main>
+  <section class="add-todo">
+    <h2>New Task?</h2>
+    <div class="add-form">
+      <input
+        type="text"
+        placeholder="Add a new todo"
+        [(ngModel)]="newTodoText"
+        (keyup.enter)="addTodo()"
+        class="todo-input"
+      />
+      <select [(ngModel)]="newTodoPriority" class="priority-select">
+        <option value="low">Low Priority</option>
+        <option value="medium">Medium Priority</option>
+        <option value="high">High Priority</option>
+      </select>
+      <button (click)="addTodo()" class="add-button" [disabled]="loading()">
+        Add Todo
+      </button>
+    </div>
+  </section>
+
+  <section class="controls">
+    <div class="filters">
+      <h3>Filter:</h3>
+      <button
+        (click)="currentFilter.set('all')"
+        [class.active]="currentFilter() === 'all'"
+        class="filter-btn"
+      >
+        All
+      </button>
+      <button
+        (click)="currentFilter.set('pending')"
+        [class.active]="currentFilter() === 'pending'"
+        class="filter-btn"
+      >
+        Pending
+      </button>
+      <button
+        (click)="currentFilter.set('completed')"
+        [class.active]="currentFilter() === 'completed'"
+        class="filter-btn"
+      >
+        Completed
+      </button>
+    </div>
+
+    <div class="sort">
+      <label>
+        <input
+          type="checkbox"
+          [(ngModel)]="sortByPriority"
+        />
+        Sort by Priority
+      </label>
+    </div>
+  </section>
+
+  <section class="todo-list">
+    <h2>Todo List ({{filteredAndSortedTodos().length}} items)</h2>
+
+    @if (filteredAndSortedTodos().length === 0) {
+      <p class="no-todos">No todos to show!</p>
+    }
+
+    <ul class="todos">
+      @for (todo of filteredAndSortedTodos(); track todo.id) {
+        <li class="todo-item" [class.completed]="todo.completed" [class]="getPriorityClass(todo.priority)">
+
+          @if (editingId() === todo.id) {
+            <div class="edit-form">
+              <input
+                type="text"
+                [(ngModel)]="editText"
+                class="edit-input"
+              />
+              <select [(ngModel)]="editPriority" class="edit-priority">
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+              </select>
+              <button (click)="saveEdit()" class="save-btn">Save</button>
+              <button (click)="cancelEdit()" class="cancel-btn">Cancel</button>
+            </div>
+          } @else {
+            <div class="todo-content">
+              <input
+                type="checkbox"
+                [checked]="todo.completed"
+                (change)="toggleTodo(todo)"
+                class="todo-checkbox"
+              />
+              <span class="todo-text">{{ todo.title }}</span>
+              <span class="priority-badge priority-{{todo.priority}}">
+                {{todo.priority}}
+              </span>
+            </div>
+            <div class="todo-actions">
+              <button
+                (click)="startEdit(todo)"
+                class="edit-button"
+                [disabled]="loading()"
+              >
+                Edit
+              </button>
+              <button
+                (click)="deleteTodo(todo.id)"
+                class="delete-button"
+                [disabled]="loading()"
+              >
+                Delete
+              </button>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+</main>
